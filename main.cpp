@@ -2,7 +2,6 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <sstream>
-//#include "mission.h"
 #include <windows.h>
 #include <ctime>
 #include <string>
@@ -11,15 +10,10 @@
 #include "view.h"
 #include "interface.h"
 #include "items.h"
-
-using namespace sf;
-//std::string CountLion;
-//int it;
-
 #include "map.h"
 #include "enemy.h"
 
-
+using namespace sf;
 int main()
 {
 Clock clock;
@@ -33,7 +27,7 @@ int CountSheep=500; //начальное количетво овец
 int CountWolf=10; 	//Начальное количество волков
 int CountItem=5;	//Начальное количество предметов на карте
 
-///////////////////////////генерация предметов на карте/////////////////////////////////////////
+
 Image map_image;
 map_image.loadFromFile("images/map2.png");
 map_image.createMaskFromColor(Color(48, 120, 128));
@@ -51,14 +45,11 @@ sheepImage.loadFromFile("images/sheep.png");
 Image wolfImage;
 wolfImage.loadFromFile("images/wolf.png");
 
-//Image swordImage;
-//swordImage.loadFromFile("images/items.png");
-
 Image sheepBraunImage;
 sheepBraunImage.loadFromFile("images/rpg_maker_vx_wolf_neo_style_by_neofox462.png");
 //easyEnemyImage.createMaskFromColor(Color(255, 0, 0));//сделали маску по цвету.но лучше изначально иметь прозрачную картинку. как найду комп с фотошопом - исправлю спрайт шамаича:)
 
-Player p(heroImage,1000,1000,32,32,"Player1");//объект класса игрока. x=1000 -начальная координата. 32x32 - размер текстуры
+Player p(heroImage,400,400,32,32,"Player1");//объект класса игрока. x=1000 -начальная координата. 32x32 - размер текстуры
 std::list<Entity*>  entities;//создаю список, сюда буду кидать объекты.например врагов.
 std::list<Entity*>::iterator it;//итератор чтобы проходить по эл-там списка
 std::list<Entity*>::iterator it2; // для проверки встречи друг с другом
@@ -77,7 +68,7 @@ for (int i = 0; i < CountWolf; i++)//проходимся по элементам этого вектора(а име
 	entities.push_back(new Enemy(wolfImage,r,r2,32,32,"Wolf"));//и закидываем их в список
 }
 
-SetItem(1000,1000,20);
+SetItem(450,450,20, "Sword");
 //HWND hWnd = GetConsoleWindow();//берем текущ консоль, (скрывает консоль (работает только под windows))
 //ShowWindow(hWnd, SW_HIDE);//скрывает консоль
 
@@ -87,15 +78,15 @@ std::vector<sf::VideoMode> modes = sf::VideoMode::getFullscreenModes();
 for (std::size_t i = 0; i < modes.size(); ++i)
 {
 	sf::VideoMode mode = modes[i];
-	std::cout << "Mode #" << i << ": "
-			<< mode.width << "x" << mode.height << " - "
-			<< mode.bitsPerPixel << " bpp" << std::endl;
+	//std::cout << "Mode #" << i << ": "
+	//<< mode.width << "x" << mode.height << " - "
+	//<< mode.bitsPerPixel << " bpp" << std::endl;
 }
 // Create a window with the same pixel depth as the desktop
 sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
 //window.create(sf::VideoMode(desktop.width, desktop.height, desktop.bitsPerPixel), "Glass and Grass");
 //RenderWindow window(VideoMode(640, 480), "Glass and Grass");
-RenderWindow window(sf::VideoMode(desktop.width, desktop.height, desktop.bitsPerPixel), "Glass and Grass");
+RenderWindow window(sf::VideoMode(desktop.width, desktop.height, desktop.bitsPerPixel), "Glass Grass");
 view.reset(FloatRect(0, 0, 640, 480));
 window.setFramerateLimit(60); //устанавливаем частоту кадров в секунду
 
@@ -104,18 +95,6 @@ font.loadFromFile("CyrilicOld.ttf");
 Text text("", font, 16);
 text.setColor(Color::White);
 
-//Image quest_image;
-//quest_image.loadFromFile("images/missionbg.jpg");
-//quest_image.createMaskFromColor(Color(0, 0, 0));
-//Texture quest_texture;
-//quest_texture.loadFromImage(quest_image);
-//Sprite s_quest;
-//s_quest.setTexture(quest_texture);
-//s_quest.setTextureRect(IntRect(0, 0, 340, 510));  //приведение типов, размеры картинки исходные
-//s_quest.setScale(0.6f, 0.6f);//чуть уменьшили картинку, => размер стал меньше
-//bool showMissionText = true;//логическая переменная, отвечающая за появление текста миссии на экране
-
-	
 SetMap(); // делаем карту
 
 	while (window.isOpen())
@@ -128,8 +107,6 @@ SetMap(); // делаем карту
 		else  { view.move(0.8, 0); }
 		clock.restart();
 		time = time / 800;
-		//std::cout << "time " << time <<"\n";
-		//std::cout << "gameTime " << gameTime <<"\n";
 		
 		if(rand()%100<5)SetGrassOnMap(); // шанс на появление на карте травы в случайном месте.
 		//SetGrassOnMap(); //появление на карте травы в случайном месте.
@@ -142,35 +119,6 @@ SetMap(); // делаем карту
 				for (it = entities.begin(); it != entities.end();) {Entity *b = *it; it = entities.erase(it); delete b;}
 				window.close();
 			}
-//			if (event.type == Event::KeyPressed)//событие нажатия клавиши
-//			if ((event.key.code == Keyboard::Tab)) {//если клавиша ТАБ
-//
-//					
-//				switch (showMissionText) {//переключатель, реагирующий на логическую переменную showMissionText
-//
-//				case true: {
-//							   std::ostringstream playerHealthString;//строка здоровья игрока
-//							   playerHealthString << p.health; //заносим в строку здоровье 
-//							   std::ostringstream playerTime;//строка здоровья игрока
-//							   playerTime << time; //заносим в строку здоровье 
-//							   std::ostringstream sheep;
-//							   sheep << entities.size();
-//							   std::ostringstream task;//строка текста миссии
-//							   task << getTextMission(getCurrentMission(p.getplayercoordinateX()));//вызывается функция getTextMission (она возвращает текст миссии), которая принимает в качестве аргумента функцию getCurrentMission(возвращающую номер миссии), а уже эта ф-ция принимает в качестве аргумента функцию p.getplayercoordinateX() (эта ф-ция возвращает Икс координату игрока)
-//							   text.setString("Здоровье: " + playerHealthString.str());
-//							   //text.setString("время: " + playerTime.str() + "\n" + task.str());
-//							   text.setString("овцы: " + sheep.str());
-//							   
-//							   showMissionText = false;//эта строка позволяет убрать все что мы вывели на экране
-//							   break;//выходим , чтобы не выполнить условие "false" (которое ниже)
-//				}
-//				case false: {
-//								text.setString("");//если не нажата клавиша таб, то весь этот текст пустой
-//								showMissionText = true;// а эта строка позволяет снова нажать клавишу таб и получить вывод на экран
-//								break;
-//				}
-//				}
-//			}
 		}
 	
 		
@@ -191,26 +139,10 @@ SetMap(); // делаем карту
 				it++;//и идем курсором (итератором) к след объекту. так делаем со всеми объектами списка
 			}
 		}
-		//LimitUpdateCount+=0.1;
-		//if(LimitUpdateCount>10){std::cout << entities.size() <<"\n"; LimitUpdateCount=0;} //выводим в консоль количество существ списка
-		
-		//for (it = entities.begin(); it != entities.end(); it++) { (*it)->update(time);}//для всех элементов списка(пока это только враги,но могут быть и пули к примеру) активируем ф-цию update
-				
+	
 
 		window.setView(view);
 		window.clear();
-
-
-//		if ((getCurrentMission(p.getplayercoordinateX())) == 0) 
-//		{ 	//Если текущая миссия 0, то рисуем карту вот так
-			//отрисовка карты меняется следующим образом:
-			
-		//for (it = entities.begin(); it != entities.end(); it++)
-		//{
-		//	if ((*it)->x < p.x+VisibleDist && (*it)->x > p.x-VisibleDist)  
-		//		if ((*it)->y < p.y+VisibleDist && (*it)->y > p.y-VisibleDist)
-		//			window.draw((*it)->sprite); //рисуем entities объекты
-		//}
 		
         for (int i = 0; i < HEIGHT_MAP; i++) //цикл по высоте
 		  if (i < (p.y+VisibleDist)/32 && i > (p.y-VisibleDist)/32)
@@ -257,43 +189,7 @@ SetMap(); // делаем карту
 			window.draw(s_map);
 	
 		}
-//		}
-
-//		if ((getCurrentMission(p.getplayercoordinateX())) >= 1) { //тут будет ночь. Програмно сделать всё темнее.
-//																	//условие по таймеру, а не по координатам.
-//        for (int i = 0; i < HEIGHT_MAP; i++) //цикл по высоте
-//                for (int j = 0; j < WIDTH_MAP; j++) // по ширине
-//                {
-//                    switch (TileMap[i][j]) //оператор switch case, смотрит на значение в переменной и выполняет действия в зависимости от содержания. замена многочисленным if-ам.
-//                    {
-//                    case Floor: //земля
-//                        s_map.setTextureRect(IntRect(200, 8, 32, 32));
-//                        break;
-//                    case Stone: //камень
-//                        s_map.setTextureRect(IntRect(328, 200, 32, 32));
-//                        break;
-//                    case Brick: // кирпич
-//                        s_map.setTextureRect(IntRect(104, 142, 32, 32));
-//                        break;
-//                    case Rock: // скалы
-//                        s_map.setTextureRect(IntRect(296, 232, 32, 32));
-//                        break;
-//					case Grass: // трава
-//                        s_map.setTextureRect(IntRect(40, 8, 32, 32));
-//                        break;
-//                    };
-//                    s_map.setPosition(j * 32, i * 32); 
-//					window.draw(s_map);
-//                }
-//		}
-
-					
-//		if (!showMissionText) {
-//			text.setPosition(view.getCenter().x + 125, view.getCenter().y - 130);//позиция всего этого текстового блока
-//			s_quest.setPosition(view.getCenter().x + 115, view.getCenter().y - 130);//позиция фона для блока			
-//			window.draw(s_quest); window.draw(text); //рисуем спрайт свитка (фон для текста миссии). а затем и текст. все это завязано на логическую переменную, которая меняет свое состояние от нажатия клавиши ТАБ
-//		}
-
+		
 //////////////////////////////////столкновения объектов//////////////////////////////////////////
 		LimitUpdateSex+=0.1;
 		if(LimitUpdateSex>0.4)
@@ -303,37 +199,6 @@ SetMap(); // делаем карту
 			
 			if((*it)->satiety>10 && (*it)->age>3) // если эта овца сыта и подходящего возраста
 			{
-				//if ((*it)->getRect().intersects(p.getRect()))//если прямоугольник спрайта объекта пересекается с игроком
-				//{
-				//	if ((*it)->name == "Sheep") //и при этом имя объекта Sheep,то..
-				//	{
-				//
-				//		////////выталкивание врага
-				//		if ((*it)->dx>0)//если враг идет вправо
-				//		{
-				//			//std::cout << "(*it)->x" << (*it)->x << "\n";//коорд игрока
-				//			//std::cout << "p.x" << p.x << "\n\n";//коорд врага
-				//
-				//			(*it)->x = p.x - (*it)->w; //отталкиваем его от игрока влево (впритык)
-				//			(*it)->dx = 0;//останавливаем
-				//			
-				//			//std::cout << "new (*it)->x" << (*it)->x << "\n";//новая коорд врага
-				//			//std::cout << "new p.x" << p.x << "\n\n";//новая коорд игрока (останется прежней)
-				//		}
-				//		if ((*it)->dx < 0)//если враг идет влево
-				//		{
-				//			(*it)->x = p.x + p.w; //аналогично - отталкиваем вправо
-				//			(*it)->dx = 0;//останавливаем
-				//		}
-				//		///////выталкивание игрока
-				//		if (p.dx < 0) { p.x = (*it)->x + (*it)->w;}//если столкнулись с врагом и игрок идет влево то выталкиваем игрока
-				//		if (p.dx > 0) { p.x = (*it)->x - p.w;}//если столкнулись с врагом и игрок идет вправо то выталкиваем игрока
-				//		
-				//
-				//	}				
-				//}
-				
-				//for (it2 = entities.begin(); it2 != entities.end(); it2++) //столкновения овец
 				for (it2 = it; it2 != entities.end(); it2++) //столкновения овец
 				{
 					if ((*it)->getRect() != (*it2)->getRect())//при этом это должны быть разные прямоугольники
@@ -385,7 +250,7 @@ SetMap(); // делаем карту
 				}
 		}
 		
-		SetViewItems(VisibleDist, p.x, p.y, window); //рисуем предметы
+		SetViewItems(VisibleDist, p.x, p.y, window, time); //рисуем предметы
 		
 				
 		window.draw(p.sprite);	//рисуем игрока		
@@ -397,13 +262,19 @@ SetMap(); // делаем карту
 				std::ostringstream sheep;
 				sheep << entities.size();
 				std::ostringstream items;
-				items << GetItemsCount();
+				items << GetItemsSize();
 				text.setPosition((view.getCenter().x - view.getSize().x / 2)+100, (view.getCenter().y - view.getSize().y / 2)+5);
 				text.setString("существ: " + sheep.str() + ", предметов: " + items.str());
 				window.draw(text);
 				
 		window.display();
 	}
-
+	entities.clear();
+//		for (it = entities.begin(); it != entities.end();)//при выходе из игры чистим список существ. 
+//		{
+//			Entity *b = *it;
+//			it = entities.erase(it); delete b; 
+//			it++;
+//		}
 	return 0;
 }

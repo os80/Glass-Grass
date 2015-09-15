@@ -50,10 +50,10 @@ virtual void update(float time) = 0;
 	int ligth;//свет
 	bool needle;//иглы (без перчаток такое не взять, а можно и себя баффнуть)
 	enum {Mbone,Mwood,Msteel,Mskin,Mpaper,Mglass,Mgrass,Mwater,Mrock,Mdiamond,Mgold,Mbronze} material;//материал
-	enum {bottle,sword,bone,shield,wand,ring,chest,skin,scroll,gem} tipe; //тип предмета
+	enum {bottle,sword,bone,shield,wand,ring,chest,skin,scroll,gem, container} tipe; //тип предмета
 	bool distance;//дистаннционный эффект
 	bool mud;//пачкает руки (оставляет следы на руках или в контейнере. Разные следы могут реагировать)
-	bool container;//контейнер
+	//bool container;//контейнер
 	int rigidity;//жескость
 	bool wave;//звук (флейта призыва или изгнания, гремящие доспехи)
 	int value;//ценность (скажем, это коэффициент силы его эффекта)
@@ -86,15 +86,15 @@ virtual void update(float time) = 0;
 class Item :public Items {
 	public:
 		Item(Image &image, float X, float Y,int W,int H,String Name):Items(image,X,Y,W,H,Name){
-		sprite.setTextureRect(IntRect(0, 0, w, h));
-		
+			sprite.setTextureRect(IntRect(96, 48, w, h));	
+			
 		};
 		
-	void update(float time){
-	
-	};
+		void update(float time){	
+		sprite.setPosition(x + w / 2, y + h / 2); //задаем позицию спрайта в место его центра
+		};
 };
 
-int GetItemsCount();
-void SetItem(float x, float y, int value);
-void SetViewItems(int VisibleDist,float px, float py, RenderWindow &window);
+int GetItemsSize();
+void SetItem(float x, float y, int value, String tipe);
+void SetViewItems(int VisibleDist,float px, float py, RenderWindow &window, float time);

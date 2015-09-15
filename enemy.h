@@ -33,10 +33,8 @@ public:
 	int playerScore;//эта переменная может быть только у игрока
 
 	   Player(Image &image, float X, float Y,int W,int H,String Name):Entity(image,X,Y,W,H,Name){
-		   playerScore = 0; state = stay;
-		   if (name == "Player1"){
-			   sprite.setTextureRect(IntRect(32, 192, w, h));
-		   }
+			playerScore = 0; state = stay;		   
+			sprite.setTextureRect(IntRect(32, 192, w, h));		   
 	   }
 
 	   void control() //движение игрока клавишами
