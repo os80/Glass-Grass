@@ -7,7 +7,7 @@ virtual void update(float time) = 0;
 	enum { left, right, up, down, jump, stay } state;//добавляем тип перечисления - состояние объекта
 	float age, health, dx, dy, x, y, moveTimer, a, CurrentFrame;//добавили переменную таймер для будущих целей
 	double speed;
-	int w,h,r,satiety;
+	int w,h,r,satiety,SeeSheepRadius, iter;
 	bool life, isMove, onGround;
 	Texture texture;
 	Sprite sprite;
@@ -139,6 +139,8 @@ public:
 			speed = 50;
 			satiety = 5;
 			age=rand()%10;
+			SeeSheepRadius=320;
+			iter=1;
 			
 		}
 		if (name == "Wolf"){
@@ -154,7 +156,7 @@ public:
 	void checkCollisionWithMap(float Dx, float Dy)//ф ция проверки столкновений с картой
 	{
 		for (int i = y / 32; i < (y + h) / 32; i++)//проходимся по элементам карты
-		for (int j = x / 32; j<(x + w) / 32; j++)
+		for (int j = x / 32; j < (x + w) / 32; j++)
 		{
 			if (TileMap[i][j] == Brick)//если элемент наш тайлик кирпича, то
 			{
@@ -177,9 +179,7 @@ public:
 	{
 		if (name == "Sheep") //для персонажа с таким именем логика будет такой.
 		{	
-			//RectangleShape HpBar(sf::Vector2f(100*(health/100.0),10));
-			//HpBar.setPosition(x,y);
-			//window.draw(HpBar);
+
 			moveTimer += time;
 			if (moveTimer>3000+rand()%9000)//меняет направление раз в несколько секунд
 			{ 
@@ -193,6 +193,28 @@ public:
 				}
 			moveTimer = 0; 
 			}
+
+				iter=1;
+				if(health<70)//////////////////////ищет траву
+				for (int i = (y/32)-iter; i < (y/32)+iter; i++){
+					for (int j = (x/32)-iter; j < (x/32)+iter; j++){
+						//if(rand()%10000==1)std::cout << "iter=" << iter << " i=" << i << " y/32=" << y/32 << " j=" << j << " x/32=" << x/32 <<"\n";
+						if(j<WIDTH_MAP-1 && i<HEIGHT_MAP-1 && i>1 && j>1)
+						if(TileMap[i][j] == Grass){
+							if(i==y){dy=0; if(dx<0)state=left;else state=right;}
+							if(i<y/32){dy = -SetRandomSpeed(speed); state=up;}else{dy = SetRandomSpeed(speed); state=down;}
+							if(j==x){dx=0; if(dy<0)state=up;else state=down;}
+							if(j<x/32){dx = -SetRandomSpeed(speed); state=left;}else{dx = SetRandomSpeed(speed); state=right;}
+							//std::cout << "GRASS iter=" << iter << " i=" << i << " y/32=" << y/32 << " j=" << j << " x/32=" << x/32 <<"\n";
+						iter=0;
+						}
+						if(iter==0) break;
+					}
+					if(iter==0) break;
+					iter++;if(iter>SeeSheepRadius)iter=SeeSheepRadius;					
+				}
+				
+			
 			
 			switch (state)//анимация в зависимости от состояния.
 			{
@@ -232,14 +254,18 @@ public:
 			checkCollisionWithMap(0, dy);//обрабатываем столкновение по Y
 			sprite.setPosition(x + w / 2, y + h / 2); //задаем позицию спрайта в место его центра
 			
+
 			//ест траву
 			for (int i = y / 32; i < (y + h) / 32; i++)//проходимся по элементам карты
 			for (int j = x / 32; j<(x + w) / 32; j++)			
 			{
-				if (TileMap[i][j] == Grass)//если элемент наш тайлик трава, то съедаем её.				
+				if (TileMap[i][j] == Grass && health<80)//если элемент наш тайлик трава, то съедаем её.				
 				{
-				if(health<100)health+=5;
+				if(health<100)health+=50;
+				if(health>100)health=100;
 				satiety++; //Поели? Сытость возросла
+				if(satiety>100)satiety=100;
+				
 				if(rand()%2==1)	TileMap[i][j] = Floor; //меняем съеденую траву на землю или камни
 				else 			TileMap[i][j] = Stone;
 				state=stay;
@@ -249,7 +275,7 @@ public:
 			age += 0.001;	// постепенно увеличиваем возраст.
 			if(age<3)sprite.setScale(0.5f, 0.5f); else sprite.setScale(0.9f, 0.9f); //молодые овечки маленькие, взрослые - большие
 			if (health <= 0)life = false;
-			if (age > 20) 	life = false;
+			if (age > 60) 	life = false;
 		}
 		if (name == "Wolf") //для персонажа с таким именем логика будет такой.
 		{	

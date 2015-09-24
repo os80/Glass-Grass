@@ -23,7 +23,7 @@ float LimitUpdateSex=0;
 float LimitUpdateCount=0;
 srand(time(0)); 	//делаем рандом всегда разным.
 int VisibleDist=360;//дистанция отрисовки существ
-int CountSheep=500; //начальное количетво овец
+int CountSheep=400; //начальное количетво овец
 int CountWolf=10; 	//Начальное количество волков
 int CountItem=5;	//Начальное количество предметов на карте
 
@@ -57,14 +57,18 @@ std::list<Entity*>::iterator it2; // для проверки встречи друг с другом
 
 for (int i = 0; i < CountSheep; i++)//проходимся по элементам этого вектора(а именно по овцам)
 {
-	int r=abs(rand()%(HEIGHT_MAP*32)-200); //начальные координаты появления юнита
-	int r2=abs(rand()%(HEIGHT_MAP*32)-200);
+	int r=abs(rand()%(HEIGHT_MAP*32)); //начальные координаты появления юнита
+	int r2=abs(rand()%(WIDTH_MAP*32));
+	if(r<65 || r>(HEIGHT_MAP*32)-96)r=65;
+	if(r2<65 || r2>(WIDTH_MAP*32)-96)r2=65;
 	entities.push_back(new Enemy(sheepImage,r,r2,32,32,"Sheep"));//и закидываем их в список
 }
 for (int i = 0; i < CountWolf; i++)//проходимся по элементам этого вектора(а именно по волкам)
 {
-	int r=abs(rand()%(HEIGHT_MAP*32)-200);  //начальные координаты появления юнита
-	int r2=abs(rand()%(HEIGHT_MAP*32)-200);
+	int r=abs(rand()%(HEIGHT_MAP*32));  //начальные координаты появления юнита
+	int r2=abs(rand()%(WIDTH_MAP*32));
+	if(r<65 || r>(HEIGHT_MAP*32)-96)r=65;
+	if(r2<65 || r2>(WIDTH_MAP*32)-96)r2=65;
 	entities.push_back(new Enemy(wolfImage,r,r2,32,32,"Wolf"));//и закидываем их в список
 }
 
@@ -87,7 +91,7 @@ sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
 //window.create(sf::VideoMode(desktop.width, desktop.height, desktop.bitsPerPixel), "Glass and Grass");
 //RenderWindow window(VideoMode(640, 480), "Glass and Grass");
 RenderWindow window(sf::VideoMode(desktop.width, desktop.height, desktop.bitsPerPixel), "Glass Grass");
-view.reset(FloatRect(0, 0, 640, 480));
+view.reset(FloatRect(0, 0, desktop.width, desktop.height));
 window.setFramerateLimit(60); //устанавливаем частоту кадров в секунду
 
 Font font;
@@ -108,8 +112,8 @@ SetMap(); // делаем карту
 		clock.restart();
 		time = time / 800;
 		
-		if(rand()%100<5)SetGrassOnMap(); // шанс на появление на карте травы в случайном месте.
-		//SetGrassOnMap(); //появление на карте травы в случайном месте.
+		//if(rand()%100<5)SetGrassOnMap(); // шанс на появление на карте травы в случайном месте.
+		SetGrassOnMap(); //появление на карте травы в случайном месте.
 		
 		Event event;
 		while (window.pollEvent(event))
@@ -201,17 +205,17 @@ SetMap(); // делаем карту
 			{
 				for (it2 = it; it2 != entities.end(); it2++) //столкновения овец
 				{
-					if ((*it)->getRect() != (*it2)->getRect())//при этом это должны быть разные прямоугольники
+					if ((*it)->getRect() != (*it2)->getRect() && (*it2)->satiety>10 && (*it2)->age>3)//при этом это должны быть разные прямоугольники
 					if (((*it)->getRect().intersects((*it2)->getRect())) && ((*it)->name == "Sheep") && ((*it2)->name == "Sheep"))//если столкнулись два объекта и они оба овцы
 					{
-						if((*it2)->satiety>10 && (*it2)->age>3) // если эта овца сыта и подходящего возраста
-						{
+						//if((*it2)->satiety>10 && (*it2)->age>3) // если эта овца сыта и подходящего возраста
+						//{
 							std::cout << "satiety before " << (*it)->satiety << " age " << (*it)->age << "health "<<  (*it)->health << "\n"; //выводим в консоль сытость и возраст овец при размножении
 							(*it)->satiety-=5;
 							(*it2)->satiety-=5;
 							entities.push_back(new Enemy(sheepImage,(*it)->x,(*it)->y,32,32,"Sheep"));
 							//std::cout << "satiety " << (*it)->satiety << (*it2)->satiety <<"\n"; //выводим в консоль сытость овец при размножении
-						}
+						//}
 					}
 					if (((*it)->getRect().intersects((*it2)->getRect())) && ((*it)->name == "Sheep") && ((*it2)->name == "Wolf"))//если столкнулись два объекта и они враги
 					{
