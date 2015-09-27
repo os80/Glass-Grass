@@ -23,7 +23,7 @@ float LimitUpdateSex=0;
 float LimitUpdateCount=0;
 srand(time(0)); 	//делаем рандом всегда разным.
 int VisibleDist=360;//дистанци€ отрисовки существ
-int CountSheep=400; //начальное количетво овец
+int CountSheep=100; //начальное количетво овец
 int CountWolf=10; 	//Ќачальное количество волков
 int CountItem=5;	//Ќачальное количество предметов на карте
 
@@ -116,9 +116,9 @@ SetMap(); // делаем карту
 		SetGrassOnMap(); //по€вление на карте травы в случайном месте.
 		
 		Event event;
-		while (window.pollEvent(event))
+		while (window.pollEvent(event)) 
 		{
-			if (event.type == sf::Event::Closed)
+			if (event.type == sf::Event::Closed) //если окно закрываетс€, удалить всех существ
 			{
 				for (it = entities.begin(); it != entities.end();) {Entity *b = *it; it = entities.erase(it); delete b;}
 				window.close();
@@ -135,7 +135,7 @@ SetMap(); // делаем карту
 			b->update(time);//вызываем ф-цию update дл€ всех объектов (по сути дл€ тех, кто жив)
 			if (b->life == false)
 			{ 
-				std::cout << "DEAD from noneat " << b->age <<"\n";
+				std::cout << "DEAD from life " << b->age <<"\n";
 				it = entities.erase(it); delete b; 
 				
 			}// если этот объект мертв, то удал€ем его			
@@ -179,10 +179,8 @@ SetMap(); // делаем карту
                 }
 		for(int x=0; x/32<5; x+=32)
 		for(int y=0; y/32<5; y+=32)
-		{
-			
-			TileMap[40+x/32][40+y/32]=Brick; // кладем кирпичи под дом, что б через него нельз€ было ходить
-	
+		{			
+			TileMap[40+x/32][40+y/32]=Brick; // кладем кирпичи под дом, что б через него нельз€ было ходить	
 		}
 		
 		for(int x=0; x/32<5; x+=32)
@@ -190,8 +188,7 @@ SetMap(); // делаем карту
 		{
 			s_map.setTextureRect(IntRect(512+x, 8+y, 32, 32));
 			s_map.setPosition(1280+x,1280+y); 
-			window.draw(s_map);
-	
+			window.draw(s_map);	
 		}
 		
 //////////////////////////////////столкновени€ объектов//////////////////////////////////////////
@@ -199,9 +196,8 @@ SetMap(); // делаем карту
 		if(LimitUpdateSex>0.4)
 		{
 		for (it = entities.begin(); it != entities.end(); it++) 
-		{
-			
-			if((*it)->satiety>10 && (*it)->age>3) // если эта овца сыта и подход€щего возраста
+		{			
+			if((*it)->satiety>10 && (*it)->age>3) // если эта овца сыта и подход€щего возраста и жива
 			{
 				for (it2 = it; it2 != entities.end(); it2++) //столкновени€ овец
 				{
@@ -217,6 +213,12 @@ SetMap(); // делаем карту
 							//std::cout << "satiety " << (*it)->satiety << (*it2)->satiety <<"\n"; //выводим в консоль сытость овец при размножении
 						//}
 					}
+					//овцы бегут от волков
+					if((*it)->name=="Sheep" && (*it2)->name=="Wolf")
+						if(abs((*it)->x-(*it2)->x)<(*it)->SeeSheepRadius && abs((*it)->y-(*it2)->y)<(*it)->SeeSheepRadius){
+							if((*it)->x<(*it2)->x) (*it)->dx = -0.01; else (*it)->dx = 0.01;
+							if((*it)->y<(*it2)->y) (*it)->dy = -0.01; else (*it)->dy = 0.01;
+						}
 					if (((*it)->getRect().intersects((*it2)->getRect())) && ((*it)->name == "Sheep") && ((*it2)->name == "Wolf"))//если столкнулись два объекта и они враги
 					{
 						if((*it)->age>3 && (*it2)->health<90) // если эта овца взросла€
@@ -244,18 +246,15 @@ SetMap(); // делаем карту
 		}
 		
 		//отрисовываем только тех существ, кто р€дом с главным героем
-		for (it = entities.begin(); it != entities.end(); it++)
-		{
-			if ((*it)->x < p.x+VisibleDist && (*it)->x > p.x-VisibleDist)  
-				if ((*it)->y < p.y+VisibleDist && (*it)->y > p.y-VisibleDist){
+		for (it = entities.begin(); it != entities.end(); it++){
+			if ((*it)->x < p.x+VisibleDist && (*it)->x > p.x-VisibleDist && (*it)->y < p.y+VisibleDist && (*it)->y > p.y-VisibleDist){
 					renderHpBar((*it)->satiety*10, (*it)->x, (*it)->y-3, 32, 2, window, Color::Blue); //полоски жизни над существами
 					renderHpBar((*it)->health, (*it)->x, (*it)->y, 32, 2, window, Color::Green); //полоски жизни над существами
 					window.draw((*it)->sprite); //рисуем entities объекты
-				}
+			}
 		}
 		
-		SetViewItems(VisibleDist, p.x, p.y, window, time); //рисуем предметы
-		
+		SetViewItems(VisibleDist, p.x, p.y, window, time); //рисуем предметы		
 				
 		window.draw(p.sprite);	//рисуем игрока		
 		
@@ -273,12 +272,7 @@ SetMap(); // делаем карту
 				
 		window.display();
 	}
-	entities.clear();
-//		for (it = entities.begin(); it != entities.end();)//при выходе из игры чистим список существ. 
-//		{
-//			Entity *b = *it;
-//			it = entities.erase(it); delete b; 
-//			it++;
-//		}
+	entities.clear(); //при выходе из игры чистим список существ. 
+
 	return 0;
 }

@@ -1,6 +1,16 @@
 #include <SFML/Graphics.hpp>
 
 using namespace sf;
+
+	float SetRandomSpeed(int r) //делаем скорость юнита случайной от 0 до speed/1000
+	{
+		//r*=1000;
+		float a=rand()%r;
+		a/=1000;
+		return abs(a);
+	};
+	
+	
 class Entity {
 public:
 virtual void update(float time) = 0;
@@ -137,7 +147,7 @@ public:
 			dx = 0;//сначала враг стоит на месте.
 			dy = 0;
 			speed = 50;
-			satiety = 5;
+			satiety = 11;
 			age=rand()%10;
 			SeeSheepRadius=320;
 			iter=1;
@@ -168,13 +178,13 @@ public:
 		}
 	}
 	
-	float SetRandomSpeed(int r) //делаем скорость юнита случайной от 0 до speed/1000
-	{
-		//r*=1000;
-		a=rand()%r;
-		a/=1000;
-		return abs(a);
-	};
+	//float SetRandomSpeed(int r) //делаем скорость юнита случайной от 0 до speed/1000
+	//{
+	//	//r*=1000;
+	//	a=rand()%r;
+	//	a/=1000;
+	//	return abs(a);
+	//};
 	void update(float time)
 	{
 		if (name == "Sheep") //для персонажа с таким именем логика будет такой.
