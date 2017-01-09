@@ -3,12 +3,16 @@ using namespace sf;
 
 sf::View view;//объ€вили sfml объект "вид", который и €вл€етс€ камерой
 
-void setPlayerCoordinateForView(float x, float y) { //функци€ дл€ считывани€ координат игрока
-	float tempX = x; float tempY = y;//считываем коорд игрока и провер€ем их, чтобы убрать кра€
+//sf::View minimap;
+
+
+void setPlayerCoordinateForView(int x, int y) { //функци€ дл€ считывани€ координат игрока
+	int tempX = x; int tempY = y;//считываем коорд игрока и провер€ем их, чтобы убрать кра€
 
 	if (x < 320) tempX = 320;//убираем из вида левую сторону
 	if (y < 240) tempY = 240;//верхнюю сторону
-	if (y > 7500) tempY = 7500;//нижнюю сторону	
+	if (x > 9280) tempX = 9280;
+	if (y > 9360) tempY = 9360;//нижнюю сторону	
 
 	view.setCenter(tempX, tempY); //следим за игроком, передава€ его координаты. 
 	
@@ -39,14 +43,14 @@ void changeview(){
 
 
 	if (Keyboard::isKeyPressed(Keyboard::U)) {
-		view.zoom(1.1000f); //масштабируем, уменьшение
+		view.zoom(1.0005f); //масштабируем, уменьшение
 		//view.zoom(1.0006f); //тоже самое помедленнее соответственно
 	}
 
 	if (Keyboard::isKeyPressed(Keyboard::Y)) {
 		//view.setRotation(90);//сразу же задает поворот камере
 		//view.rotate(1);//постепенно поворачивает камеру (отрицательное значение - в обратную сторону)
-		view.zoom(0.9000f);
+		view.zoom(0.9995f);
 	}
 
 

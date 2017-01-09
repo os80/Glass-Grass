@@ -1,6 +1,8 @@
-const int HEIGHT_MAP = 100; //размер карты высота
-const int WIDTH_MAP = 100; //размер карты ширина
-enum mapObjects { Brick , Floor, Stone, Rock, House, Well, Tree, Grass }; // перечисляемый тип. Просто названия объектов, которые мы хотим использовать. Можно было обойтись и просто числами, но так проще разбираться в написанном коде чтобы не задумываться, 3 - это у нас сердечко или волчья ягода.
+const int HEIGHT_MAP = 300; //размер карты высота
+const int WIDTH_MAP = 300; //размер карты ширина
+enum mapObjects { Brick , Floor, Stone, Rock, House, Well, Tree, Grass, 
+Coast1, Coast2, Coast3, Coast4, Coast5, Coast8, Coast9, Coast10, Coast11, 
+Coast12, Woter1, Woter2 }; // Элементы карты
 mapObjects TileMap[HEIGHT_MAP][WIDTH_MAP]; // создание массива для карты. по умолчанию он заполнится первым элементом типа - кирпичом.  
 
 int SetMap()
@@ -15,11 +17,11 @@ int SetMap()
 		if (Object == House) {if (rand()%100>200)Object = House; else Object=Floor;}
 		if (Object == Well)  {if (rand()%100<2)Object = Well; else Object=Floor;}
 		TileMap[i][j] = Object; 
-		//std::cout << Object;
-		//if(j>WIDTH_MAP-3) std::cout << "\n";
+
 	}
 	return TileMap[HEIGHT_MAP][WIDTH_MAP];			
 }
+
 
 int SetGrassOnMap(){	//новая трава растет на карте в случайном месте
 int i;
@@ -30,6 +32,6 @@ if(i>HEIGHT_MAP-2) i=HEIGHT_MAP-2;
 j=rand()%WIDTH_MAP;
 if(j<2) j=1;
 if(j>WIDTH_MAP-2) j=WIDTH_MAP-2;
-TileMap[i][j] = Grass;
+if(TileMap[i][j] == Floor || TileMap[i][j] == Stone) TileMap[i][j] = Grass;
 return TileMap[i][j];
 }

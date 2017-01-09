@@ -1,29 +1,19 @@
 #include <SFML/Graphics.hpp>
 
 using namespace sf;
-
-	float SetRandomSpeed(int r) //делаем скорость юнита случайной от 0 до speed/1000
-	{
-		//r*=1000;
-		float a=rand()%r;
-		a/=1000;
-		return abs(a);
-	};
-	
-	
 class Entity {
 public:
 virtual void update(float time) = 0;
 	enum { left, right, up, down, jump, stay } state;//добавляем тип перечисления - состояние объекта
-	float age, health, dx, dy, x, y, moveTimer, a, CurrentFrame;//добавили переменную таймер для будущих целей
+	float age, ageAdult, ageDie, health, dx, dy, x, y, moveTimer, a, CurrentFrame, eros;//добавили переменную таймер для будущих целей
 	double speed;
-	int w,h,r,satiety,SeeSheepRadius, iter;
-	bool life, isMove, onGround;
+	int w,h,r,satiety, SeeSheepRadius, state2;
+	bool life, isMove, onGround, readyToChild;
 	Texture texture;
 	Sprite sprite;
-	String name;//враги могут быть разные, мы не будем делать другой класс для врага.всего лишь различим врагов по имени и дадим каждому свое действие в update в зависимости от имени
+	int name;//враги могут быть разные, мы не будем делать другой класс для врага.всего лишь различим врагов по имени и дадим каждому свое действие в update в зависимости от имени
 
-	Entity(Image &image, float X, float Y,int W,int H,String Name)
+	Entity(Image &image, float X, float Y,int W,int H,int Name, float Age)
 	{
 		x = X; y = Y; w = W; h = H; name = Name; moveTimer = 0;
 		speed = 0; health = 100; dx = 0; dy = 0; 
@@ -32,6 +22,7 @@ virtual void update(float time) = 0;
 		texture.loadFromImage(image);
 		sprite.setTexture(texture);
 		sprite.setOrigin(w / 2, h / 2);
+		age = Age;
 	}
 	FloatRect getRect(){return FloatRect(x, y, w, h);}
 };
@@ -41,22 +32,23 @@ class Player :public Entity {
 public:
 	//enum { left, right, up, down, jump, stay } state;//добавляем тип перечисления - состояние объекта
 	int playerScore;//эта переменная может быть только у игрока
+	
 
-	   Player(Image &image, float X, float Y,int W,int H,String Name):Entity(image,X,Y,W,H,Name){
-			playerScore = 0; state = stay;		   
-			sprite.setTextureRect(IntRect(32, 192, w, h));		   
+	   Player(Image &image, float X, float Y,int W,int H,int Name, float Age):Entity(image,X,Y,W,H,Name,Age){
+		   playerScore = 0; state = stay; health=100;
+		   //if (name == 3){
+			   sprite.setTextureRect(IntRect(32, 192, w, h));
+		   //}
 	   }
 
 	   void control() //движение игрока клавишами
 	   {
 		   //if (Keyboard::isKeyPressed) 
 		   //{
-			   if (Keyboard::isKeyPressed(Keyboard::Left)) 		{state = left; 	if (Keyboard::isKeyPressed(Keyboard::LShift)) speed = 0.1; else speed = 0.05;}
-			   else if (Keyboard::isKeyPressed(Keyboard::Right)){state = right; if (Keyboard::isKeyPressed(Keyboard::LShift)) speed = 0.1; else speed = 0.05;}
-			   else if (Keyboard::isKeyPressed(Keyboard::Up)) 	{state = up; 	if (Keyboard::isKeyPressed(Keyboard::LShift)) speed = 0.1; else speed = 0.05;}
-			   else if (Keyboard::isKeyPressed(Keyboard::Down)) {state = down; 	if (Keyboard::isKeyPressed(Keyboard::LShift)) speed = 0.1; else speed = 0.05;}
-			   //if (Keyboard::isKeyPressed(Keyboard::LShift)) speed = 0.1;
-			   //std::cout << "press "<<"\n";
+		if 		(Keyboard::isKeyPressed(Keyboard::Left) || Keyboard::isKeyPressed(Keyboard::A))	{state = left; 	if (Keyboard::isKeyPressed(Keyboard::LShift)) speed = 0.1; else speed = 0.05;}
+		else if	(Keyboard::isKeyPressed(Keyboard::Right)|| Keyboard::isKeyPressed(Keyboard::D)) {state = right; if (Keyboard::isKeyPressed(Keyboard::LShift)) speed = 0.1; else speed = 0.05;}
+		else if	(Keyboard::isKeyPressed(Keyboard::Up)	|| Keyboard::isKeyPressed(Keyboard::W))	{state = up; 	if (Keyboard::isKeyPressed(Keyboard::LShift)) speed = 0.1; else speed = 0.05;}
+		else if	(Keyboard::isKeyPressed(Keyboard::Down) || Keyboard::isKeyPressed(Keyboard::S))	{state = down; 	if (Keyboard::isKeyPressed(Keyboard::LShift)) speed = 0.1; else speed = 0.05;}
 		   //}
 		   else {state=stay; speed=0; dx=dy=0;}
 	   } 
@@ -78,6 +70,10 @@ public:
 	    
 	   void update(float time)
 	   {
+		health += 0.01;
+		if(health > 100) health=100;
+		if(health <= 0) life = false;
+		
 		   control();//функция управления персонажем
 		   switch (state)//тут делаются различные действия в зависимости от состояния
 		   {
@@ -137,36 +133,44 @@ public:
 };
 
 /////////////////////////////////////класс врага//////////////////////////////////////////////////
+//Name 1 - Sheep
+//Name 2 - Wolf
 class Enemy :public Entity{
 public:
 	
-	Enemy(Image &image, float X, float Y,int W,int H,String Name):Entity(image,X,Y,W,H,Name){ 
+	Enemy(Image &image, float X, float Y,int W,int H,int Name, float Age):Entity(image,X,Y,W,H,Name,Age){ 
 
-		if (name == "Sheep"){
+		if (name == 1){
 			sprite.setTextureRect(IntRect(0, 0, w, h));
-			dx = 0;//сначала враг стоит на месте.
-			dy = 0;
-			speed = 50;
-			satiety = 11;
-			age=rand()%10;
-			SeeSheepRadius=320;
-			iter=1;
-			
+			dx = 			0;//сначала враг стоит на месте.
+			dy = 			0;
+			speed = 		30;
+			satiety = 		rand()%20;
+			SeeSheepRadius =160;
+			ageAdult = 		3;
+			ageDie = 		200;
+			readyToChild =	false;
+			state =			stay;
+			state2=			0;
 		}
-		if (name == "Wolf"){
+		if (name == 2){
 			sprite.setTextureRect(IntRect(0, 0, w, h));
-			dx = 0;//сначала враг стоит на месте.
-			dy = 0;
-			speed = 10;
-			satiety = 5;
-			age=rand()%10;
+			dx = 		0;//сначала враг стоит на месте.
+			dy = 		0;
+			speed = 	50;
+			//satiety = 	5;
+			eros = 		0;
+			ageAdult = 	5;
+			ageDie = 	800;
+			readyToChild=false;
+			state =		stay;
 		}
 	}
 
 	void checkCollisionWithMap(float Dx, float Dy)//ф ция проверки столкновений с картой
 	{
 		for (int i = y / 32; i < (y + h) / 32; i++)//проходимся по элементам карты
-		for (int j = x / 32; j < (x + w) / 32; j++)
+		for (int j = x / 32; j<(x + w) / 32; j++)
 		{
 			if (TileMap[i][j] == Brick)//если элемент наш тайлик кирпича, то
 			{
@@ -178,54 +182,40 @@ public:
 		}
 	}
 	
-	//float SetRandomSpeed(int r) //делаем скорость юнита случайной от 0 до speed/1000
-	//{
-	//	//r*=1000;
-	//	a=rand()%r;
-	//	a/=1000;
-	//	return abs(a);
-	//};
+	
+	float SetRandomSpeed(int r) //делаем скорость юнита случайной от 0 до speed/1000
+	{
+		//r*=1000;
+		a=rand()%r;
+		a/=1000;
+		return abs(a);
+	};
 	void update(float time)
 	{
-		if (name == "Sheep") //для персонажа с таким именем логика будет такой.
+		if (name == 1) //для персонажа с таким именем логика будет такой.
 		{	
-
+			//RectangleShape HpBar(sf::Vector2f(100*(health/100.0),10));
+			//HpBar.setPosition(x,y);
+			//window.draw(HpBar);
 			moveTimer += time;
 			if (moveTimer>3000+rand()%9000)//меняет направление раз в несколько секунд
 			{ 
-				switch (rand()%7) //чем число больше пяти, тем чаще будет стоять на месте.
+				switch (rand()%20) //чем число больше пяти, тем чаще будет стоять на месте.
 				{
-				case 1: {dy = SetRandomSpeed(speed);  state=down;  dx=0; break;} // если убрать dx=0, то будет ходить по диагонали, но анимации такой нет и будет криво выглядеть.
-				case 2: {dy = -SetRandomSpeed(speed); state=up;    dx=0; break;}
-				case 3: {dx = SetRandomSpeed(speed);  state=right; dy=0; break;}
-				case 4: {dx = -SetRandomSpeed(speed); state=left;  dy=0; break;}
-				default: {state=stay;}
+				case 1: {dy = SetRandomSpeed(speed);  state=down; state2=4; break;} //dx=0; break;} // если убрать dx=0, то будет ходить по диагонали, но анимации такой нет и будет криво выглядеть.
+				case 2: {dy = -SetRandomSpeed(speed); state=up;   state2=3; break;} //dx=0; break;}
+				case 3: {dx = SetRandomSpeed(speed);  state=right;state2=2; break;} //dy=0; break;}
+				case 4: {dx = -SetRandomSpeed(speed); state=left; state2=1; break;} //dy=0; break;}
+				default: {state=stay; state2=0;}
 				}
 			moveTimer = 0; 
 			}
-
-				iter=1;
-				if(health<70)//////////////////////ищет траву
-				for (int i = (y/32)-iter; i < (y/32)+iter; i++){
-					for (int j = (x/32)-iter; j < (x/32)+iter; j++){
-						//if(rand()%10000==1)std::cout << "iter=" << iter << " i=" << i << " y/32=" << y/32 << " j=" << j << " x/32=" << x/32 <<"\n";
-						if(j<WIDTH_MAP-1 && i<HEIGHT_MAP-1 && i>1 && j>1)
-						if(TileMap[i][j] == Grass){
-							if(i==y){dy=0; if(dx<0)state=left;else state=right;}
-							if(i<y/32){dy = -SetRandomSpeed(speed); state=up;}else{dy = SetRandomSpeed(speed); state=down;}
-							if(j==x){dx=0; if(dy<0)state=up;else state=down;}
-							if(j<x/32){dx = -SetRandomSpeed(speed); state=left;}else{dx = SetRandomSpeed(speed); state=right;}
-							//std::cout << "GRASS iter=" << iter << " i=" << i << " y/32=" << y/32 << " j=" << j << " x/32=" << x/32 <<"\n";
-						iter=0;
-						}
-						if(iter==0) break;
-					}
-					if(iter==0) break;
-					iter++;if(iter>SeeSheepRadius)iter=SeeSheepRadius;					
-				}
-				
 			
-			
+			if(state2==0)state=stay;
+			if(state2==1)state=left;
+			if(state2==2)state=right;
+			if(state2==3)state=up;
+			if(state2==4)state=down;
 			switch (state)//анимация в зависимости от состояния.
 			{
 			case right:
@@ -264,41 +254,43 @@ public:
 			checkCollisionWithMap(0, dy);//обрабатываем столкновение по Y
 			sprite.setPosition(x + w / 2, y + h / 2); //задаем позицию спрайта в место его центра
 			
-
 			//ест траву
-			for (int i = y / 32; i < (y + h) / 32; i++)//проходимся по элементам карты
-			for (int j = x / 32; j<(x + w) / 32; j++)			
+			//if(health<100)
+			for (int i = y / 32; i < (y + h/3) / 32; i++)//проходимся по элементам карты
+			for (int j = x / 32; j<(x + w/3) / 32; j++)			
 			{
-				if (TileMap[i][j] == Grass && health<80)//если элемент наш тайлик трава, то съедаем её.				
+				if (TileMap[i][j] == Grass)//если элемент наш тайлик трава, то съедаем её.				
 				{
-				if(health<100)health+=50;
-				if(health>100)health=100;
+				//if(health<100)
+				health+=5;
 				satiety++; //Поели? Сытость возросла
-				if(satiety>100)satiety=100;
-				
 				if(rand()%2==1)	TileMap[i][j] = Floor; //меняем съеденую траву на землю или камни
 				else 			TileMap[i][j] = Stone;
 				state=stay;
 				}
 			}
-			health -= 0.01; // постепенно уменьшаем здоровье.
-			age += 0.001;	// постепенно увеличиваем возраст.
-			if(age<3)sprite.setScale(0.5f, 0.5f); else sprite.setScale(0.9f, 0.9f); //молодые овечки маленькие, взрослые - большие
-			if (health <= 0)life = false;
-			if (age > 60) 	life = false;
+			health -= 0.0001; // постепенно уменьшаем здоровье.
+			age += 0.00001;	// постепенно увеличиваем возраст.
+			readyToChild=false;
+			if (age > ageAdult && satiety > 10) readyToChild=true;
+			if (age < ageAdult)sprite.setScale(0.5f, 0.5f); else sprite.setScale(0.9f, 0.9f); //молодые овечки маленькие, взрослые - большие
+			if (health <= 0)	life = false;
+			if (satiety > 50) 	satiety=50;
+			if (satiety < 0) 	satiety=0;			
+			if (age > ageDie) 	life = false;
 		}
-		if (name == "Wolf") //для персонажа с таким именем логика будет такой.
+		if (name == 2) //для волков логика будет такой.
 		{	
 				
 			moveTimer += time;
-			if (moveTimer>4000+rand()%9000)//меняет направление раз в несколько секунд
+			if (moveTimer>4000+rand()%900)//меняет направление раз в несколько секунд
 			{ 
 				switch (rand()%5) //чем число больше пяти, тем чаще будет стоять на месте.
 				{
-				case 1: {dy = 0.05;  state=down;  dx=0; break;} // если убрать dx=0, то будет ходить по диагонали, но анимации такой нет и будет криво выглядеть.
-				case 2: {dy = -0.05; state=up;    dx=0; break;}
-				case 3: {dx = 0.05;  state=right; dy=0; break;}
-				case 4: {dx = -0.05; state=left;  dy=0; break;}
+				case 1: {dy =  SetRandomSpeed(speed); state=down;  break;} //dx=0; break;} // если убрать dx=0, то будет ходить по диагонали, но анимации такой нет и будет криво выглядеть.
+				case 2: {dy = -SetRandomSpeed(speed); state=up;    break;} //dx=0; break;}
+				case 3: {dx =  SetRandomSpeed(speed); state=right; break;} //dy=0; break;}
+				case 4: {dx = -SetRandomSpeed(speed); state=left;  break;} //dy=0; break;}
 				default: {state=stay;}
 				}
 			moveTimer = 0; 
@@ -342,10 +334,19 @@ public:
 			checkCollisionWithMap(0, dy);//обрабатываем столкновение по Y
 			sprite.setPosition(x + w / 2, y + h / 2); //задаем позицию спрайта в место его центра
 			
-			health -= 0.001; // постепенно уменьшаем здоровье.
-			age += 0.001;	// постепенно увеличиваем возраст.
-			if (health <= 0)life = false;
-			if (age > 40) 	life = false;
+			health -= 0.0001; // постепенно уменьшаем здоровье.
+			if(health>100) health=100;
+			age += 0.00001;	// постепенно увеличиваем возраст.
+			eros+= 0.0001;		// постепенно увеличиваем желание к размножению.
+			if(eros > 50) eros=50;
+			readyToChild=false;
+			if(age > ageAdult && eros > 10) readyToChild=true;
+			
+			if(age < ageAdult)sprite.setScale(0.5f, 0.5f); else sprite.setScale(0.9f, 0.9f); //молодые волки маленькие, взрослые - большие
+			if (health <= 0)	life = false;
+			if (age > ageDie) 	life = false;
+			
 		}
+		
 	}
 };
